@@ -12,6 +12,7 @@ def main():
     <style>
     .stApp {
         background-color: #ffffff;
+        color: #333333;  /* Dark gray, almost black text color */
     }
     .stButton>button {
         color: #ffffff;
@@ -37,11 +38,13 @@ def main():
         border: 2px solid #0077BE;
         border-radius: 5px;
         display: inline-block;
+        background-color: #ffffff;
     }
     .dataframe {
         width: 100%;
         text-align: left;
         border-collapse: collapse;
+        color: #333333;  /* Dark gray, almost black text color for tables */
     }
     .dataframe th {
         background-color: #0077BE;
@@ -52,6 +55,7 @@ def main():
     .dataframe td {
         padding: 10px;
         border-bottom: 1px solid #ddd;
+        color: #333333;  /* Dark gray, almost black text color for table cells */
     }
     .dataframe tr:nth-of-type(even) {
         background-color: #f8f9fa;
@@ -60,49 +64,59 @@ def main():
         text-align: center;
         padding: 10px;
     }
-    /* New styles to reduce space */
     .logo-container img {
         margin-bottom: 0;
     }
-    h1 {
-        margin-top: 0;
-        padding-top: 0;
+    h1, h2, h3, h4, h5, h6 {
+        color: #333333;  /* Dark gray, almost black text color for headers */
+    }
+    p {
+        color: #333333;  /* Dark gray, almost black text color for paragraphs */
     }
     .streamlit-expanderHeader {
         margin-bottom: 0 !important;
+        color: #333333;  /* Dark gray, almost black text color for expander headers */
     }
     .stPlotlyChart {
         margin-top: -40px;
     }
-    h3 {
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
-    }
-    /* Updated styles for spacing */
     .savings-breakdown-header {
         margin-bottom: 20px !important;
+        color: #333333;  /* Dark gray, almost black text color */
     }
     .savings-table {
         margin-top: 10px;
     }
-
     .description-box {
-        background-color: #f0f8ff;  /* Light blue background */
-        border: 2px solid #0077BE;  /* SnapLogic blue border */
+        background-color: #f0f8ff;
+        border: 2px solid #0077BE;
         border-radius: 10px;
-        padding: 20px;
+        padding: 15px;
         margin-bottom: 20px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-
     .description-box h4 {
         color: #0077BE;
         margin-top: 0;
         margin-bottom: 10px;
     }
-
     .description-box p {
         margin-bottom: 10px;
+        color: #333333;  /* Dark gray, almost black text color */
+    }
+    .output-container {
+        background-color: #f8f9fa;
+        border: 2px solid #0077BE;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        color: #333333;  /* Dark gray, almost black text color */
+    }
+    .output-container h3 {
+        color: #0077BE;
+        margin-top: 0;
+        margin-bottom: 15px;
     }
     </style>
     """, unsafe_allow_html=True)
