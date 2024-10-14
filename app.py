@@ -25,8 +25,6 @@ def main():
     }
     .stButton>button:focus:not(:active) {
         color: #ffffff;
-        border-color: #005c91;
-        box-shadow: none;
     }
     .total-savings {
         font-size: 24px;
@@ -241,26 +239,27 @@ def main():
                 fig = go.Figure(data=[
                     go.Bar(name='Time to Value Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_time_to_value, with_snaplogic_time_to_value],
-                           hovertemplate='Time to Value Cost: $%{y:,.0f}<extra></extra>',
-                           marker_color='#0077BE'),  # SnapLogic blue
+                           marker_color='#0077BE',
+                           hovertemplate='Time to Value Cost: $%{y:,.0f}<extra></extra>'),  # SnapLogic blue
                     go.Bar(name='Maintenance Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_maintenance_cost, with_snaplogic_maintenance_cost],
-                           hovertemplate='Maintenance Cost: $%{y:,.0f}<extra></extra>',
-                           marker_color='#00A8E8'),  # Lighter blue
+                           marker_color='#00A8E8',
+                           hovertemplate='Maintenance Cost: $%{y:,.0f}<extra></extra>'),  # Lighter blue
                     go.Bar(name='Development Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_dev_cost, with_snaplogic_dev_cost],
-                           hovertemplate='Development Cost: $%{y:,.0f}<extra></extra>',
-                           marker_color='#F7931E')  # SnapLogic orange
+                           marker_color='#F7931E',
+                           hovertemplate='Development Cost: $%{y:,.0f}<extra></extra>')  # SnapLogic orange
                 ])
 
                 fig.update_layout(
                     barmode='stack',
-                    yaxis=dict(tickformat='$,.0f', showticklabels=False),  # Hide y-axis labels
+                    yaxis=dict(tickformat='$,.0f'),
                     height=600,
                     legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
                     plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
                     paper_bgcolor='rgba(0,0,0,0)',  # Transparent surrounding
-                    font=dict(color='#333333')  # Dark gray text
+                    font=dict(color='#333333'),  # Dark gray text
+                    hovermode='closest'
                 )
 
                 # Display the chart with an even smaller subheader and less space
