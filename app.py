@@ -85,6 +85,25 @@ def main():
     .savings-table {
         margin-top: 10px;
     }
+
+    .description-box {
+        background-color: #f0f8ff;  /* Light blue background */
+        border: 2px solid #0077BE;  /* SnapLogic blue border */
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .description-box h4 {
+        color: #0077BE;
+        margin-top: 0;
+        margin-bottom: 10px;
+    }
+
+    .description-box p {
+        margin-bottom: 10px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -96,15 +115,26 @@ def main():
 
     st.title("ROI Calculator")
 
+    # Add description in a compact pretty box spanning both columns
+    st.markdown("""
+    <div class="description-box">
+        <h4>Hi there!</h4>
+        <p> Welcome to the SnapLogic ROI calculator. </p>
+        <p>Please enter your current customer parameters and the expected improvements with SnapLogic below.</p>
+        <p>If you're just getting started, feel free to use the example values to see how the tool works. </p>
+        <p>If you have any questions, please reach out to the SE team 👩🏻‍💻 </p>
+    </div>
+    """, unsafe_allow_html=True)
+
     # Create two columns
     left_column, right_column = st.columns(2)
 
     with left_column:
-        # Toggle for default/custom values
-        use_default = st.toggle("Use Default Values", value=True)
+        # Toggle for example/custom values
+        use_example = st.toggle("Use Example Values", value=True)
 
-        # Dictionary of default values
-        default_values = {
+        # Dictionary of example values
+        example_values = {
             "General": {
                 "FTE Developer Rate": 45.0,
             },
@@ -127,12 +157,12 @@ def main():
         }
 
         # Dictionary to store current values
-        values = {category: {} for category in default_values}
+        values = {category: {} for category in example_values}
 
         # Create input fields for all parameters in separate boxes
-        for category, params in default_values.items():
-            with st.expander(f"{category}", expanded=True):
-                for key, default_value in params.items():
+        for category, params in example_values.items():
+            with st.expander(f"{category}", expanded=False):
+                for key, example_value in params.items():
                     # Create a unique key for each input field
                     input_key = f"{category}_{key}"
                     
@@ -140,10 +170,10 @@ def main():
                         values[category][key] = st.number_input(
                             f"{key} (£):",
                             min_value=0.0,
-                            value=values[category].get(key, default_value),
+                            value=values[category].get(key, example_value),
                             step=0.01,
                             format="%.2f",
-                            disabled=use_default,
+                            disabled=use_example,
                             key=input_key
                         )
                     elif key in ["FTE Capacity Used for Onboarding (%)", "FTE Capacity Used for Maintenance (%)"]:
@@ -151,28 +181,28 @@ def main():
                             f"{key}:",
                             min_value=0,
                             max_value=100,
-                            value=int(values[category].get(key, default_value)),
+                            value=int(values[category].get(key, example_value)),
                             step=1,
-                            disabled=use_default,
+                            disabled=use_example,
                             key=input_key
                         )
-                    elif isinstance(default_value, float):
+                    elif isinstance(example_value, float):
                         values[category][key] = st.number_input(
                             f"{key}:",
                             min_value=0.0,
-                            value=values[category].get(key, default_value),
+                            value=values[category].get(key, example_value),
                             step=0.01,
                             format="%.2f",
-                            disabled=use_default,
+                            disabled=use_example,
                             key=input_key
                         )
                     else:
                         values[category][key] = st.number_input(
                             f"{key}:",
                             min_value=0,
-                            value=values[category].get(key, default_value),
+                            value=values[category].get(key, example_value),
                             step=1,
-                            disabled=use_default,
+                            disabled=use_example,
                             key=input_key
                         )
 
@@ -181,7 +211,7 @@ def main():
 
     with right_column:
         if submit_button:
-            display_values = default_values if use_default else values
+            display_values = example_values if use_example else values
 
             try:
                 # Calculate OTE FTE Developer
