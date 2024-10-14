@@ -202,19 +202,15 @@ def main():
             "Without SnapLogic": {
                 "Months to Onboard": 24,
                 "FTE Capacity Used for Onboarding (%)": 20,
-                "Number of Integrations Built Per Year": 10,
+                "Current Number of Integrations": 100,
+                "Planned Number of Integrations (Per Year)": 10,
                 "Hours to Build An Integration": 200,
                 "Number of FTE Supporting Integrations": 10,
                 "FTE Capacity Used for Maintenance (%)": 50
             },
             "With SnapLogic": {
-                "Months to Onboard": 2,
-                "FTE Capacity Used for Onboarding (%)": 20,
-                "Number of Integrations Built Per Year": 10,
-                "Hours to Build An Integration": 20,
-                "Number of FTE Supporting Integrations": 3,
-                "FTE Capacity Used for Maintenance (%)": 25
-            },
+                "Planned Number of Integrations (Per Year)": 10
+        }
         }
 
         # Dictionary to store current values
@@ -277,7 +273,12 @@ def main():
             try:
                 # Calculate OTE FTE Developer
                 ote_fte_developer = display_values["General"]["FTE Developer Rate"] * 40 * 52
-
+                with_snaplogic_months_to_onboard = int(display_values["Without SnapLogic"]["Months to Onboard"] * 0.1)
+                with_snaplogic_fte_capacity_onboarding = display_values["Without SnapLogic"]["FTE Capacity Used for Onboarding (%)"]
+                with_snaplogic_fte_capacity_maintenance = display_values["Without SnapLogic"]["FTE Capacity Used for Maintenance (%)"] * 0.5
+                with_snaplogic_hours_build_integration  = display_values["Without SnapLogic"]["Hours to Build An Integration"] * 0.1
+                with_snaplogic_n_people_supporting_integrations = int(display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"] * 0.30)
+                
                 # Perform the calculations
                 without_snaplogic_time_to_value = (
                     display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"] *
@@ -287,19 +288,19 @@ def main():
                 )
 
                 with_snaplogic_time_to_value = (
-                    display_values["With SnapLogic"]["Number of FTE Supporting Integrations"] *
-                    display_values["With SnapLogic"]["FTE Capacity Used for Onboarding (%)"]/100 *
+                    with_snaplogic_n_people_supporting_integrations *
+                    with_snaplogic_fte_capacity_onboarding/100 *
                     (ote_fte_developer *
-                     display_values["With SnapLogic"]["Months to Onboard"] / 12)
+                     with_snaplogic_months_to_onboard / 12)
                 )
 
                 # Calculate development costs
-                without_snaplogic_dev_cost = display_values["Without SnapLogic"]["Number of Integrations Built Per Year"] * display_values["Without SnapLogic"]["Hours to Build An Integration"] * display_values["General"]["FTE Developer Rate"]
-                with_snaplogic_dev_cost = display_values["With SnapLogic"]["Number of Integrations Built Per Year"] * display_values["With SnapLogic"]["Hours to Build An Integration"] * display_values["General"]["FTE Developer Rate"]
+                without_snaplogic_dev_cost = display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"] * display_values["Without SnapLogic"]["Hours to Build An Integration"] * display_values["General"]["FTE Developer Rate"]
+                with_snaplogic_dev_cost = display_values["With SnapLogic"]["Planned Number of Integrations (Per Year)"] * with_snaplogic_hours_build_integration * display_values["General"]["FTE Developer Rate"]
 
                 # Calculate maintenance costs
                 without_snaplogic_maintenance_cost = display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"] * display_values["Without SnapLogic"]["FTE Capacity Used for Maintenance (%)"]/100 * ote_fte_developer
-                with_snaplogic_maintenance_cost = display_values["With SnapLogic"]["Number of FTE Supporting Integrations"] * display_values["With SnapLogic"]["FTE Capacity Used for Maintenance (%)"]/100 * ote_fte_developer
+                with_snaplogic_maintenance_cost = with_snaplogic_n_people_supporting_integrations * with_snaplogic_fte_capacity_maintenance/100 * ote_fte_developer
 
                 # Calculate savings
                 time_to_value_savings = without_snaplogic_time_to_value - with_snaplogic_time_to_value
