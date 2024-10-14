@@ -25,6 +25,8 @@ def main():
     }
     .stButton>button:focus:not(:active) {
         color: #ffffff;
+        border-color: #005c91;
+        box-shadow: none;
     }
     .total-savings {
         font-size: 24px;
@@ -239,21 +241,21 @@ def main():
                 fig = go.Figure(data=[
                     go.Bar(name='Time to Value Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_time_to_value, with_snaplogic_time_to_value],
-                           hovertemplate='%{y:$,.0f}<extra></extra>',
+                           hovertemplate='Time to Value Cost: $%{y:,.0f}<extra></extra>',
                            marker_color='#0077BE'),  # SnapLogic blue
                     go.Bar(name='Maintenance Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_maintenance_cost, with_snaplogic_maintenance_cost],
-                           hovertemplate='%{y:$,.0f}<extra></extra>',
+                           hovertemplate='Maintenance Cost: $%{y:,.0f}<extra></extra>',
                            marker_color='#00A8E8'),  # Lighter blue
                     go.Bar(name='Development Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_dev_cost, with_snaplogic_dev_cost],
-                           hovertemplate='%{y:$,.0f}<extra></extra>',
+                           hovertemplate='Development Cost: $%{y:,.0f}<extra></extra>',
                            marker_color='#F7931E')  # SnapLogic orange
                 ])
 
                 fig.update_layout(
                     barmode='stack',
-                    yaxis=dict(tickformat='$,.0f'),
+                    yaxis=dict(tickformat='$,.0f', showticklabels=False),  # Hide y-axis labels
                     height=600,
                     legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
                     plot_bgcolor='rgba(0,0,0,0)',  # Transparent plot background
