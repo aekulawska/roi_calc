@@ -25,6 +25,8 @@ def main():
     }
     .stButton>button:focus:not(:active) {
         color: #ffffff;
+        border-color: #005c91;
+        box-shadow: none;
     }
     .total-savings {
         font-size: 24px;
@@ -108,19 +110,19 @@ def main():
             },
             "Without SnapLogic": {
                 "Months to Onboard": 24,
-                "FTE Capacity Used for Onboarding": 20.0,
+                "FTE Capacity Used for Onboarding (%)": 20,
                 "Number of Integrations Built Per Year": 10,
                 "Hours to Build An Integration": 200,
                 "Number of FTE Supporting Integrations": 10,
-                "FTE Capacity Used for Maintenance": 50
+                "FTE Capacity Used for Maintenance (%)": 50
             },
             "With SnapLogic": {
                 "Months to Onboard": 2,
-                "FFTE Capacity Used for Onboarding": 20.0,
+                "FTE Capacity Used for Onboarding (%)": 20,
                 "Number of Integrations Built Per Year": 10,
                 "Hours to Build An Integration": 20,
                 "Number of FTE Supporting Integrations": 3,
-                "FTE Capacity Used for Maintenance": 25
+                "FTE Capacity Used for Maintenance (%)": 25
             },
         }
 
@@ -144,17 +146,16 @@ def main():
                             disabled=use_default,
                             key=input_key
                         )
-                    elif key == "FTE Capacity During Onboarding":
+                    elif key in ["FTE Capacity Used for Onboarding (%)", "FTE Capacity Used for Maintenance (%)"]:
                         values[category][key] = st.number_input(
-                            f"{key} (%):",
-                            min_value=0.0,
-                            max_value=100.0,
-                            value=values[category].get(key, default_value),
-                            step=0.1,
-                            format="%.1f",
+                            f"{key}:",
+                            min_value=0,
+                            max_value=100,
+                            value=int(values[category].get(key, default_value)),
+                            step=1,
                             disabled=use_default,
                             key=input_key
-                        ) / 100  # Convert percentage to decimal
+                        )
                     elif isinstance(default_value, float):
                         values[category][key] = st.number_input(
                             f"{key}:",
@@ -189,14 +190,14 @@ def main():
                 # Perform the calculations
                 without_snaplogic_time_to_value = (
                     display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"] *
-                    display_values["Without SnapLogic"]["FTE Capacity Used for Onboarding"]/100 *
+                    display_values["Without SnapLogic"]["FTE Capacity Used for Onboarding (%)"]/100 *
                     (ote_fte_developer *
                      display_values["Without SnapLogic"]["Months to Onboard"] / 12)
                 )
 
                 with_snaplogic_time_to_value = (
                     display_values["With SnapLogic"]["Number of FTE Supporting Integrations"] *
-                    display_values["With SnapLogic"]["FFTE Capacity Used for Onboarding"]/100 *
+                    display_values["With SnapLogic"]["FTE Capacity Used for Onboarding (%)"]/100 *
                     (ote_fte_developer *
                      display_values["With SnapLogic"]["Months to Onboard"] / 12)
                 )
@@ -206,8 +207,8 @@ def main():
                 with_snaplogic_dev_cost = display_values["With SnapLogic"]["Number of Integrations Built Per Year"] * display_values["With SnapLogic"]["Hours to Build An Integration"] * display_values["General"]["FTE Developer Rate"]
 
                 # Calculate maintenance costs
-                without_snaplogic_maintenance_cost = display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"] * display_values["Without SnapLogic"]["FTE Capacity Used for Maintenance"]/100 * ote_fte_developer
-                with_snaplogic_maintenance_cost = display_values["With SnapLogic"]["Number of FTE Supporting Integrations"] * display_values["With SnapLogic"]["FTE Capacity Used for Maintenance"]/100 * ote_fte_developer
+                without_snaplogic_maintenance_cost = display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"] * display_values["Without SnapLogic"]["FTE Capacity Used for Maintenance (%)"]/100 * ote_fte_developer
+                with_snaplogic_maintenance_cost = display_values["With SnapLogic"]["Number of FTE Supporting Integrations"] * display_values["With SnapLogic"]["FTE Capacity Used for Maintenance (%)"]/100 * ote_fte_developer
 
                 # Calculate savings
                 time_to_value_savings = without_snaplogic_time_to_value - with_snaplogic_time_to_value
