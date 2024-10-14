@@ -308,6 +308,30 @@ def main():
                 maintenance_cost_savings = without_snaplogic_maintenance_cost - with_snaplogic_maintenance_cost
                 total_savings = time_to_value_savings + development_cost_savings + maintenance_cost_savings
 
+                # Calculate savings per integration
+                without_snaplogic_time_to_value_cost_per_integration = (without_snaplogic_time_to_value / display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"]) 
+                with_snaplogic_time_to_value_cost_per_integration = (with_snaplogic_time_to_value / with_snaplogic_n_people_supporting_integrations)
+                with_snaplogic_dev_cost_per_integration = (with_snaplogic_dev_cost / display_values["With SnapLogic"]["Planned Number of Integrations (Per Year)"])
+                without_snaplogic_dev_cost_per_integration = (without_snaplogic_dev_cost / display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"])
+                with_snaplogic_maintenance_cost_per_integration = (with_snaplogic_maintenance_cost / (display_values["With SnapLogic"]["Planned Number of Integrations (Per Year)"] + display_values["Without SnapLogic"]["Current Number of Integrations"]))
+                without_snaplogic_maintenance_cost_per_integration = (without_snaplogic_maintenance_cost / (display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"] + display_values["Without SnapLogic"]["Current Number of Integrations"]))
+
+                # Create a dataframe for the savings per integration table
+                savings_per_integration_data = {
+                    "Category": ["Time to Value Cost", "Development Cost", "Maintenance Cost"],
+                    "Without SnapLogic": [
+                        f"${int(round(without_snaplogic_time_to_value_cost_per_integration)):,}",
+                        f"${int(round(without_snaplogic_dev_cost_per_integration)):,}",
+                        f"${int(round(without_snaplogic_maintenance_cost_per_integration)):,}"
+                    ],
+                    "With SnapLogic": [
+                        f"${int(round(with_snaplogic_time_to_value_cost_per_integration)):,}",
+                        f"${int(round(with_snaplogic_dev_cost_per_integration)):,}",
+                        f"${int(round(with_snaplogic_maintenance_cost_per_integration)):,}"
+                    ]
+                }
+                savings_per_integration_df = pd.DataFrame(savings_per_integration_data)
+
                 # Display the total savings with custom styling and blue box
                 st.markdown(f'<div class="total-savings">Total Annual Cost Savings with SnapLogic: ${int(round(total_savings)):,}</div>', unsafe_allow_html=True)
 
@@ -358,7 +382,12 @@ def main():
                 # Display the chart with an even smaller subheader and less space
                 st.markdown('<h3>Cost Comparison: Without vs With SnapLogic</h3>', unsafe_allow_html=True)
                 st.plotly_chart(fig, use_container_width=True)
-             
+
+                # Display the Cost Per Integration table
+                st.markdown('<h3 class="savings-breakdown-header">Cost Per Integration</h3>', unsafe_allow_html=True)
+                st.markdown('<div class="savings-table">', unsafe_allow_html=True)
+                st.table(savings_per_integration_df.set_index("Category"))
+                st.markdown('</div>', unsafe_allow_html=True)
 
             except Exception as e:
                 st.error(f"An error occurred during calculation: {str(e)}")
