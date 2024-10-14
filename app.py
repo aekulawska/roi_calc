@@ -119,7 +119,7 @@ def main():
     st.markdown("""
     <div class="description-box">
         <h4>Hi there!</h4>
-        <p> Welcome to the SnapLogic ROI calculator. </p>
+        <p> Welcome to SnapLogic's ROI calculator. </p>
         <p>Please enter your current customer parameters and the expected improvements with SnapLogic below.</p>
         <p>If you're just getting started, feel free to use the example values to see how the tool works. </p>
         <p>If you have any questions, please reach out to the SE team 👩🏻‍💻 </p>
