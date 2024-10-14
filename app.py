@@ -11,23 +11,46 @@ def main():
     st.markdown("""
     <style>
     .stApp {
-        background-color: #ffffff;
-        color: #333333;  /* Dark gray, almost black text color */
+        background-color: var(--background-color);
+        color: var(--text-color);
     }
     .stButton>button {
-        color: #ffffff;
+        color: white !important;
         background-color: #0077BE;
         border-color: #0077BE;
     }
     .stButton>button:hover {
         background-color: #005c91;
         border-color: #005c91;
-        color: #ffffff;
+        color: white !important;
     }
     .stButton>button:focus:not(:active) {
-        color: #ffffff;
+        color: white !important;
         border-color: #005c91;
         box-shadow: none;
+    }
+    .stButton > button,
+    .stButton > button:hover,
+    .stButton > button:focus,
+    .stButton > button:active,
+    .stButton > button:disabled {
+        color: white !important;
+        background-color: #0077BE !important;
+        border-color: #0077BE !important;
+    }
+    .stButton > button:hover {
+        background-color: #005c91 !important;
+        border-color: #005c91 !important;
+    }
+    .stButton > button * {
+        color: white !important;
+    }
+
+    /* Ensure text color for any child elements */
+    .stButton > button span,
+    .stButton > button p,
+    .stButton > button div {
+        color: white !important;
     }
     .total-savings {
         font-size: 24px;
@@ -38,13 +61,13 @@ def main():
         border: 2px solid #0077BE;
         border-radius: 5px;
         display: inline-block;
-        background-color: #ffffff;
+        background-color: var(--background-color);
     }
     .dataframe {
         width: 100%;
         text-align: left;
         border-collapse: collapse;
-        color: #333333;  /* Dark gray, almost black text color for tables */
+        color: var(--text-color);
     }
     .dataframe th {
         background-color: #0077BE;
@@ -54,11 +77,11 @@ def main():
     }
     .dataframe td {
         padding: 10px;
-        border-bottom: 1px solid #ddd;
-        color: #333333;  /* Dark gray, almost black text color for table cells */
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
     }
     .dataframe tr:nth-of-type(even) {
-        background-color: #f8f9fa;
+        background-color: var(--even-row-color);
     }
     .logo-container {
         text-align: center;
@@ -68,27 +91,27 @@ def main():
         margin-bottom: 0;
     }
     h1, h2, h3, h4, h5, h6 {
-        color: #333333;  /* Dark gray, almost black text color for headers */
+        color: var(--text-color);
     }
     p {
-        color: #333333;  /* Dark gray, almost black text color for paragraphs */
+        color: var(--text-color);
     }
     .streamlit-expanderHeader {
         margin-bottom: 0 !important;
-        color: #333333;  /* Dark gray, almost black text color for expander headers */
+        color: var(--text-color);
     }
     .stPlotlyChart {
         margin-top: -40px;
     }
     .savings-breakdown-header {
         margin-bottom: 20px !important;
-        color: #333333;  /* Dark gray, almost black text color */
+        color: var(--text-color);
     }
     .savings-table {
         margin-top: 10px;
     }
     .description-box {
-        background-color: #f0f8ff;
+        background-color: var(--description-box-bg);
         border: 2px solid #0077BE;
         border-radius: 10px;
         padding: 15px;
@@ -102,21 +125,45 @@ def main():
     }
     .description-box p {
         margin-bottom: 10px;
-        color: #333333;  /* Dark gray, almost black text color */
+        color: var(--text-color);
     }
     .output-container {
-        background-color: #f8f9fa;
+        background-color: var(--output-container-bg);
         border: 2px solid #0077BE;
         border-radius: 10px;
         padding: 20px;
         margin-top: 20px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        color: #333333;  /* Dark gray, almost black text color */
+        color: var(--text-color);
     }
     .output-container h3 {
         color: #0077BE;
         margin-top: 0;
         margin-bottom: 15px;
+    }
+    
+    /* Dark mode styles */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --background-color: #1E1E1E;
+            --text-color: #E0E0E0;
+            --border-color: #444444;
+            --even-row-color: #2A2A2A;
+            --description-box-bg: #2A2A2A;
+            --output-container-bg: #2A2A2A;
+        }
+    }
+    
+    /* Light mode styles */
+    @media (prefers-color-scheme: light) {
+        :root {
+            --background-color: #FFFFFF;
+            --text-color: #333333;
+            --border-color: #DDDDDD;
+            --even-row-color: #F8F9FA;
+            --description-box-bg: #F0F8FF;
+            --output-container-bg: #F8F9FA;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
