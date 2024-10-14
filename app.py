@@ -239,18 +239,15 @@ def main():
                 fig = go.Figure(data=[
                     go.Bar(name='Time to Value Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_time_to_value, with_snaplogic_time_to_value],
-                           text=[f'${v:,.0f}' for v in [without_snaplogic_time_to_value, with_snaplogic_time_to_value]], 
-                           textposition='inside',
+                           hovertemplate='%{y:$,.0f}<extra></extra>',
                            marker_color='#0077BE'),  # SnapLogic blue
                     go.Bar(name='Maintenance Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_maintenance_cost, with_snaplogic_maintenance_cost],
-                           text=[f'${v:,.0f}' for v in [without_snaplogic_maintenance_cost, with_snaplogic_maintenance_cost]], 
-                           textposition='inside',
+                           hovertemplate='%{y:$,.0f}<extra></extra>',
                            marker_color='#00A8E8'),  # Lighter blue
                     go.Bar(name='Development Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_dev_cost, with_snaplogic_dev_cost],
-                           text=[f'${v:,.0f}' for v in [without_snaplogic_dev_cost, with_snaplogic_dev_cost]], 
-                           textposition='inside',
+                           hovertemplate='%{y:$,.0f}<extra></extra>',
                            marker_color='#F7931E')  # SnapLogic orange
                 ])
 
@@ -267,7 +264,6 @@ def main():
                 # Display the chart with an even smaller subheader and less space
                 st.markdown('<h3>Cost Comparison: Without vs With SnapLogic</h3>', unsafe_allow_html=True)
                 st.plotly_chart(fig, use_container_width=True)
-
              
 
             except Exception as e:
