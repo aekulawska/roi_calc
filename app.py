@@ -280,14 +280,14 @@ def main():
                 with_snaplogic_n_people_supporting_integrations = int(display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"] * 0.30)
                 
                 # Perform the calculations
-                without_snaplogic_time_to_value = (
+                without_snaplogic_employee_onboarding = (
                     display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"] *
                     display_values["Without SnapLogic"]["FTE Capacity Used for Onboarding (%)"]/100 *
                     (ote_fte_developer *
                      display_values["Without SnapLogic"]["Months to Onboard"] / 12)
                 )
 
-                with_snaplogic_time_to_value = (
+                with_snaplogic_employee_onboarding = (
                     with_snaplogic_n_people_supporting_integrations *
                     with_snaplogic_fte_capacity_onboarding/100 *
                     (ote_fte_developer *
@@ -303,14 +303,14 @@ def main():
                 with_snaplogic_maintenance_cost = with_snaplogic_n_people_supporting_integrations * with_snaplogic_fte_capacity_maintenance/100 * ote_fte_developer
 
                 # Calculate savings
-                time_to_value_savings = without_snaplogic_time_to_value - with_snaplogic_time_to_value
+                employee_onboarding_savings = without_snaplogic_employee_onboarding - with_snaplogic_employee_onboarding
                 development_cost_savings = without_snaplogic_dev_cost - with_snaplogic_dev_cost
                 maintenance_cost_savings = without_snaplogic_maintenance_cost - with_snaplogic_maintenance_cost
-                total_savings = time_to_value_savings + development_cost_savings + maintenance_cost_savings
+                total_savings = employee_onboarding_savings + development_cost_savings + maintenance_cost_savings
 
                 # Calculate savings per integration
-                without_snaplogic_time_to_value_cost_per_integration = (without_snaplogic_time_to_value / display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"]) 
-                with_snaplogic_time_to_value_cost_per_integration = (with_snaplogic_time_to_value / with_snaplogic_n_people_supporting_integrations)
+                without_snaplogic_employee_onboarding_cost_per_integration = (without_snaplogic_employee_onboarding / display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"]) 
+                with_snaplogic_employee_onboarding_cost_per_integration = (with_snaplogic_employee_onboarding / with_snaplogic_n_people_supporting_integrations)
                 with_snaplogic_dev_cost_per_integration = (with_snaplogic_dev_cost / display_values["With SnapLogic"]["Planned Number of Integrations (Per Year)"])
                 without_snaplogic_dev_cost_per_integration = (without_snaplogic_dev_cost / display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"])
                 with_snaplogic_maintenance_cost_per_integration = (with_snaplogic_maintenance_cost / (display_values["With SnapLogic"]["Planned Number of Integrations (Per Year)"] + display_values["Without SnapLogic"]["Current Number of Integrations"]))
@@ -318,14 +318,14 @@ def main():
 
                 # Create a dataframe for the savings per integration table
                 savings_per_integration_data = {
-                    "Category": ["Time to Value Cost", "Development Cost", "Maintenance Cost"],
+                    "Category": ["Employee Onboarding Cost", "Development Cost", "Maintenance Cost"],
                     "Without SnapLogic": [
-                        f"${int(round(without_snaplogic_time_to_value_cost_per_integration)):,}",
+                        f"${int(round(without_snaplogic_employee_onboarding_cost_per_integration)):,}",
                         f"${int(round(without_snaplogic_dev_cost_per_integration)):,}",
                         f"${int(round(without_snaplogic_maintenance_cost_per_integration)):,}"
                     ],
                     "With SnapLogic": [
-                        f"${int(round(with_snaplogic_time_to_value_cost_per_integration)):,}",
+                        f"${int(round(with_snaplogic_employee_onboarding_cost_per_integration)):,}",
                         f"${int(round(with_snaplogic_dev_cost_per_integration)):,}",
                         f"${int(round(with_snaplogic_maintenance_cost_per_integration)):,}"
                     ]
@@ -337,9 +337,9 @@ def main():
 
                 # Create a dataframe for the savings table
                 savings_data = {
-                    "Category": ["Time to Value Savings", "Development Cost Savings", "Maintenance Cost Savings"],
+                    "Category": ["Employee Onboarding Savings", "Development Cost Savings", "Maintenance Cost Savings"],
                     "Amount": [
-                        f"${int(round(time_to_value_savings)):,}",
+                        f"${int(round(employee_onboarding_savings)):,}",
                         f"${int(round(development_cost_savings)):,}",
                         f"${int(round(maintenance_cost_savings)):,}"
                     ]
@@ -354,10 +354,10 @@ def main():
 
                 # Create interactive stacked bar plot
                 fig = go.Figure(data=[
-                    go.Bar(name='Time to Value Cost', x=['Without SnapLogic', 'With SnapLogic'], 
-                           y=[without_snaplogic_time_to_value, with_snaplogic_time_to_value],
+                    go.Bar(name='Employee Onboarding Cost', x=['Without SnapLogic', 'With SnapLogic'], 
+                           y=[without_snaplogic_employee_onboarding, with_snaplogic_employee_onboarding],
                            marker_color='#0077BE',
-                           hovertemplate='Time to Value Cost: $%{y:,.0f}<extra></extra>'),  # SnapLogic blue
+                           hovertemplate='Employee Onboarding Cost: $%{y:,.0f}<extra></extra>'),  # SnapLogic blue
                     go.Bar(name='Maintenance Cost', x=['Without SnapLogic', 'With SnapLogic'], 
                            y=[without_snaplogic_maintenance_cost, with_snaplogic_maintenance_cost],
                            marker_color='#00A8E8',
