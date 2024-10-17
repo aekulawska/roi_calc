@@ -247,7 +247,7 @@ def main():
                 "FTE Capacity Used for Maintenance (%)": 50
             },
             "With SnapLogic": {
-                "Planned Number of Integrations (Per Year)": 10
+                "Number of Integrations to be Moved": 100
         }
         }
 
@@ -334,7 +334,7 @@ def main():
 
                 # Calculate development costs
                 without_snaplogic_dev_cost = display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"] * display_values["Without SnapLogic"]["Hours to Build An Integration"] * display_values["General"]["FTE Developer Rate"]
-                with_snaplogic_dev_cost = display_values["With SnapLogic"]["Planned Number of Integrations (Per Year)"] * with_snaplogic_hours_build_integration * display_values["General"]["FTE Developer Rate"]
+                with_snaplogic_dev_cost = display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"] * with_snaplogic_hours_build_integration * display_values["General"]["FTE Developer Rate"]
 
                 # Calculate maintenance costs
                 without_snaplogic_maintenance_cost = display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"] * display_values["Without SnapLogic"]["FTE Capacity Used for Maintenance (%)"]/100 * ote_fte_developer
@@ -349,9 +349,9 @@ def main():
                 # Calculate savings per integration
                 without_snaplogic_employee_onboarding_cost_per_integration = (without_snaplogic_employee_onboarding / display_values["Without SnapLogic"]["Number of FTE Supporting Integrations"]) 
                 with_snaplogic_employee_onboarding_cost_per_integration = (with_snaplogic_employee_onboarding / with_snaplogic_n_people_supporting_integrations)
-                with_snaplogic_dev_cost_per_integration = (with_snaplogic_dev_cost / display_values["With SnapLogic"]["Planned Number of Integrations (Per Year)"])
+                with_snaplogic_dev_cost_per_integration = (with_snaplogic_dev_cost / display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"])
                 without_snaplogic_dev_cost_per_integration = (without_snaplogic_dev_cost / display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"])
-                with_snaplogic_maintenance_cost_per_integration = (with_snaplogic_maintenance_cost / (display_values["With SnapLogic"]["Planned Number of Integrations (Per Year)"] + display_values["Without SnapLogic"]["Current Number of Integrations"]))
+                with_snaplogic_maintenance_cost_per_integration = (with_snaplogic_maintenance_cost / (display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"] + display_values["With SnapLogic"]["Number of Integrations to be Moved"]))
                 without_snaplogic_maintenance_cost_per_integration = (without_snaplogic_maintenance_cost / (display_values["Without SnapLogic"]["Planned Number of Integrations (Per Year)"] + display_values["Without SnapLogic"]["Current Number of Integrations"]))
 
                 # Create a dataframe for the savings per integration table
