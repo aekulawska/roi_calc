@@ -74,6 +74,7 @@ def main():
         color: white;
         font-weight: bold;
         padding: 10px;
+        text-align: left;  /* Add this line to left-align column names */
     }
     .dataframe td {
         padding: 10px;
@@ -385,8 +386,8 @@ def main():
                 hover_df = savings_df.copy()
                 hover_df['Category'] = hover_df['Category'].apply(lambda x: f"{x}<div class='hover-info'>{hover_descriptions[x]}</div>")
                 
-                # Display the table
-                st.markdown(hover_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                # Display the table with left-aligned headers
+                st.markdown(hover_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
 
                 # Create interactive stacked bar plot
                 fig = go.Figure(data=[
@@ -433,8 +434,8 @@ def main():
                 hover_cost_per_integration_df = savings_per_integration_df.copy()
                 hover_cost_per_integration_df['Category'] = hover_cost_per_integration_df['Category'].apply(lambda x: f"{x}<div class='hover-info'>{cost_per_integration_descriptions[x]}</div>")
                 
-                # Display the table
-                st.markdown(hover_cost_per_integration_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+                # Display the table with left-aligned headers
+                st.markdown(hover_cost_per_integration_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
 
             except Exception as e:
                 st.error(f"An error occurred during calculation: {str(e)}")
