@@ -166,6 +166,44 @@ def main():
             --output-container-bg: #F8F9FA;
         }
     }
+
+    /* Updated styles for tooltips */
+    :root {
+        --tooltip-bg-color: #f8f9fa;
+        --tooltip-text-color: #212529;
+    }
+
+    [data-theme="dark"] {
+        --tooltip-bg-color: #f8f9fa;
+        --tooltip-text-color: #000000;
+    }
+
+    .tooltip {
+        position: relative;
+        display: inline-block;
+    }
+
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: var(--tooltip-bg-color);
+        color: var(--tooltip-text-color);
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -418,7 +456,7 @@ def main():
                 st.markdown(hover_css, unsafe_allow_html=True)
 
                 # Display the savings table with hover effect
-                st.markdown('<h3 class="savings-breakdown-header">Savings Breakdown</h3>', unsafe_allow_html=True)
+                st.subheader("Savings Breakdown (Annual)")
                 
                 # Create a copy of the dataframe with hover info
                 hover_df = savings_df.copy()
@@ -455,7 +493,7 @@ def main():
                 )
 
                 # Display the chart with an even smaller subheader and less space
-                st.markdown('<h3>Cost Comparison: Without vs With SnapLogic</h3>', unsafe_allow_html=True)
+                st.subheader("Cost Comparison (Annual)")
                 st.plotly_chart(fig, use_container_width=True)
 
                 # Create hover descriptions for Cost Per Integration
@@ -466,7 +504,7 @@ def main():
                 }
 
                 # Modify the display of the Cost Per Integration table
-                st.markdown('<h3 class="savings-breakdown-header">Cost Per Integration</h3>', unsafe_allow_html=True)
+                st.subheader("Cost Per Integration (Annual)")
                 
                 # Create a copy of the dataframe with hover info
                 hover_cost_per_integration_df = savings_per_integration_df.copy()
