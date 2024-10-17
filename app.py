@@ -441,6 +441,7 @@ def main():
                     padding: 10px;
                     z-index: 1000;
                     max-width: 300px;
+                    color: #000000 !important; /* Force black text */
                 }
                 .dataframe td:first-child {
                     position: relative;
