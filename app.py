@@ -333,8 +333,27 @@ def main():
                 }
                 savings_per_integration_df = pd.DataFrame(savings_per_integration_data)
 
-                # Display the total savings with custom styling and blue box
-                st.markdown(f'<div class="total-savings">Total Annual Cost Savings with SnapLogic: ${int(round(total_savings)):,}</div>', unsafe_allow_html=True)
+                # Create tabs for different savings periods
+                tab1, tab2, tab3, tab4, tab5 = st.tabs(["1 Year", "2 Year", "3 Year", "4 Year", "5 Year"])
+
+                with tab1:
+                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(total_savings)):,}</div>', unsafe_allow_html=True)
+
+                with tab2:
+                    two_year_savings = total_savings * 2
+                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(two_year_savings)):,}</div>', unsafe_allow_html=True)
+
+                with tab3:
+                    three_year_savings = total_savings * 3
+                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(three_year_savings)):,}</div>', unsafe_allow_html=True)
+
+                with tab4:
+                    four_year_savings = total_savings * 4
+                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(four_year_savings)):,}</div>', unsafe_allow_html=True)
+
+                with tab5:
+                    five_year_savings = total_savings * 5
+                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(five_year_savings)):,}</div>', unsafe_allow_html=True)
 
                 # Create a dataframe for the savings table
                 savings_data = {
