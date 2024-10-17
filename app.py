@@ -346,11 +346,47 @@ def main():
                 }
                 savings_df = pd.DataFrame(savings_data)
 
-                # Display the savings table with more space
+                # Create hover descriptions
+                hover_descriptions = {
+                    "Employee Onboarding Savings": "This refers to the reduction in costs associated with onboarding users onto integration systems. With SnapLogic, the time and resources required to onboard employees are significantly reduced, leading to cost savings.",
+                    "Development Cost Savings": "These are the savings realized in the process of creating new integrations. SnapLogic's platform allows for faster and more efficient development of integrations, reducing the time and effort required, which translates to lower development costs.",
+                    "Maintenance Cost Savings": "This represents the reduced expenses for ongoing upkeep and management of existing integrations. SnapLogic's platform typically requires less maintenance effort compared to traditional integration methods, resulting in lower costs for maintaining integrations."
+                }
+
+                # Create custom CSS for hover effect
+                hover_css = """
+                <style>
+                .hover-info {
+                    display: none;
+                    position: absolute;
+                    background-color: #f9f9f9;
+                    border: 1px solid #ccc;
+                    padding: 10px;
+                    z-index: 1000;
+                    max-width: 300px;
+                }
+                .dataframe td:first-child {
+                    position: relative;
+                    cursor: help;
+                }
+                .dataframe td:first-child:hover .hover-info {
+                    display: block;
+                }
+                </style>
+                """
+
+                # Apply custom CSS
+                st.markdown(hover_css, unsafe_allow_html=True)
+
+                # Display the savings table with hover effect
                 st.markdown('<h3 class="savings-breakdown-header">Savings Breakdown</h3>', unsafe_allow_html=True)
-                st.markdown('<div class="savings-table">', unsafe_allow_html=True)
-                st.table(savings_df.set_index("Category"))
-                st.markdown('</div>', unsafe_allow_html=True)
+                
+                # Create a copy of the dataframe with hover info
+                hover_df = savings_df.copy()
+                hover_df['Category'] = hover_df['Category'].apply(lambda x: f"{x}<div class='hover-info'>{hover_descriptions[x]}</div>")
+                
+                # Display the table
+                st.markdown(hover_df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
                 # Create interactive stacked bar plot
                 fig = go.Figure(data=[
@@ -383,11 +419,22 @@ def main():
                 st.markdown('<h3>Cost Comparison: Without vs With SnapLogic</h3>', unsafe_allow_html=True)
                 st.plotly_chart(fig, use_container_width=True)
 
-                # Display the Cost Per Integration table
+                # Create hover descriptions for Cost Per Integration
+                cost_per_integration_descriptions = {
+                    "Employee Onboarding Cost": "This represents the cost of onboarding employees to use integration systems, calculated per integration. It shows how SnapLogic reduces this cost significantly.",
+                    "Development Cost": "This is the cost of creating a new integration. The comparison demonstrates how SnapLogic reduces development costs per integration.",
+                    "Maintenance Cost": "This shows the ongoing cost to maintain each integration. The difference illustrates SnapLogic's efficiency in reducing maintenance costs per integration."
+                }
+
+                # Modify the display of the Cost Per Integration table
                 st.markdown('<h3 class="savings-breakdown-header">Cost Per Integration</h3>', unsafe_allow_html=True)
-                st.markdown('<div class="savings-table">', unsafe_allow_html=True)
-                st.table(savings_per_integration_df.set_index("Category"))
-                st.markdown('</div>', unsafe_allow_html=True)
+                
+                # Create a copy of the dataframe with hover info
+                hover_cost_per_integration_df = savings_per_integration_df.copy()
+                hover_cost_per_integration_df['Category'] = hover_cost_per_integration_df['Category'].apply(lambda x: f"{x}<div class='hover-info'>{cost_per_integration_descriptions[x]}</div>")
+                
+                # Display the table
+                st.markdown(hover_cost_per_integration_df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
             except Exception as e:
                 st.error(f"An error occurred during calculation: {str(e)}")
