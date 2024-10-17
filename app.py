@@ -332,27 +332,47 @@ def main():
                 }
                 savings_per_integration_df = pd.DataFrame(savings_per_integration_data)
 
-                # Create tabs for different savings periods
-                tab1, tab2, tab3, tab4, tab5 = st.tabs(["1 Year", "2 Year", "3 Year", "4 Year", "5 Year"])
+                # Replace the tabs with a single box showing 5-year and annual savings
+                st.markdown("""
+                <div class="total-savings">
+                    <h2>Total 5 Year Cost Savings with SnapLogic</h2>
+                    <div class="big-savings">${:,}</div>
+                    <h3>Annual Cost Savings</h3>
+                    <div class="annual-savings">${:,}</div>
+                </div>
+                """.format(int(round(total_savings * 5)), int(round(total_savings))), unsafe_allow_html=True)
 
-                with tab1:
-                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(total_savings)):,}</div>', unsafe_allow_html=True)
-
-                with tab2:
-                    two_year_savings = total_savings * 2
-                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(two_year_savings)):,}</div>', unsafe_allow_html=True)
-
-                with tab3:
-                    three_year_savings = total_savings * 3
-                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(three_year_savings)):,}</div>', unsafe_allow_html=True)
-
-                with tab4:
-                    four_year_savings = total_savings * 4
-                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(four_year_savings)):,}</div>', unsafe_allow_html=True)
-
-                with tab5:
-                    five_year_savings = total_savings * 5
-                    st.markdown(f'<div class="total-savings">Total Cost Savings with SnapLogic: ${int(round(five_year_savings)):,}</div>', unsafe_allow_html=True)
+                # Add this CSS to your existing styles
+                st.markdown("""
+                <style>
+                .total-savings {
+                    text-align: center;
+                    padding: 20px;
+                    border: 2px solid #0077BE;
+                    border-radius: 10px;
+                    background-color: var(--background-color);
+                }
+                .total-savings h2 {
+                    color: #0077BE;
+                    margin-bottom: 10px;
+                }
+                .big-savings {
+                    font-size: 48px;
+                    font-weight: bold;
+                    color: #0077BE;
+                    margin-bottom: 20px;
+                }
+                .total-savings h3 {
+                    color: #0077BE;
+                    margin-bottom: 5px;
+                }
+                .annual-savings {
+                    font-size: 24px;
+                    font-weight: bold;
+                    color: #0077BE;
+                }
+                </style>
+                """, unsafe_allow_html=True)
 
                 # Create a dataframe for the savings table
                 savings_data = {
