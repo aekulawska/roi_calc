@@ -422,9 +422,9 @@ def main():
 
                 # Create hover descriptions for Cost Per Integration
                 cost_per_integration_descriptions = {
-                    "Employee Onboarding Cost": "This represents the cost of onboarding employees to use integration systems, calculated per integration. It shows how SnapLogic reduces this cost significantly.",
-                    "Development Cost": "This is the cost of creating a new integration. The comparison demonstrates how SnapLogic reduces development costs per integration.",
-                    "Maintenance Cost": "This shows the ongoing cost to maintain each integration. The difference illustrates SnapLogic's efficiency in reducing maintenance costs per integration."
+                    "Employee Onboarding Cost": "This represents the cost of onboarding employees to use integration systems, calculated per integration.",
+                    "Development Cost": "This is the cost of creating a new integration.",
+                    "Maintenance Cost": "This shows the ongoing cost to maintain each integration."
                 }
 
                 # Modify the display of the Cost Per Integration table
