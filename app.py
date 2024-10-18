@@ -217,12 +217,17 @@ def main():
     }
     .stDownloadButton > button {
         color: white !important;
-        background-color: #0077BE !important;
-        border-color: #0077BE !important;
+        background-color: #FF4B4B !important;
+        border-color: #FF4B4B !important;
     }
     .stDownloadButton > button:hover {
-        background-color: #005c91 !important;
-        border-color: #005c91 !important;
+        background-color: #EA3535 !important;
+        border-color: #EA3535 !important;
+    }
+    .stDownloadButton > button:focus:not(:active) {
+        color: white !important;
+        border-color: #EA3535 !important;
+        box-shadow: none;
     }
     .stDownloadButton > button * {
         color: white !important;
@@ -233,6 +238,42 @@ def main():
     .stDownloadButton > button p,
     .stDownloadButton > button div {
         color: white !important;
+    }
+
+    /* Updated styles for the buttons */
+    .stButton > button {
+        height: 3rem;
+        padding: 0 1rem;
+        white-space: nowrap;
+    }
+    .stDownloadButton > button {
+        color: white !important;
+        background-color: #FF4B4B !important;
+        border-color: #FF4B4B !important;
+        height: 3rem;
+        padding: 0 1rem;
+        white-space: nowrap;
+    }
+    .stDownloadButton > button:hover {
+        background-color: #EA3535 !important;
+        border-color: #EA3535 !important;
+    }
+    .stDownloadButton > button:focus:not(:active) {
+        color: white !important;
+        border-color: #EA3535 !important;
+        box-shadow: none;
+    }
+    .stDownloadButton > button * {
+        color: white !important;
+    }
+
+    /* Custom CSS to reduce gap between buttons */
+    .button-container {
+        display: flex;
+        gap: 0px;
+    }
+    .button-container > div {
+        flex: 0 0 auto;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -331,8 +372,24 @@ def main():
                             key=input_key
                         )
 
-        # Submit button
-        submit_button = st.button("Submit")
+        # Create a container for the buttons
+        button_container = st.container()
+
+        # Use custom HTML for button layout
+        button_container.markdown('<div class="button-container">', unsafe_allow_html=True)
+        
+        # Create two columns for the buttons with no gap
+        col1, col2, _ = button_container.columns([1, 1.5, 2])
+
+        # Submit button in the first column
+        with col1:
+            submit_button = st.button("Submit")
+
+        # Placeholder for the download button in the second column
+        with col2:
+            download_button_placeholder = st.empty()
+
+        button_container.markdown('</div>', unsafe_allow_html=True)
 
     with right_column:
         if submit_button:
@@ -547,19 +604,23 @@ def main():
                 # Generate PDF data
                 pdf_data = generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_descriptions)
 
-                # Display the download button above the savings box
-                st.download_button(
-                    label="Download Report",
-                    data=pdf_data,
-                    file_name="roi_report.pdf",
-                    mime="application/pdf"
-                )
+                # Display the download button in the placeholder
+                with col2:
+                    download_button_placeholder.download_button(
+                        label="Download Report",
+                        data=pdf_data,
+                        file_name="roi_report.pdf",
+                        mime="application/pdf"
+                    )
 
                 # Add some space between the button and the savings box
                 st.markdown("<br>", unsafe_allow_html=True)
 
             except Exception as e:
                 st.error(f"An error occurred during calculation: {str(e)}")
+                # Clear the download button if there's an error
+                with col2:
+                    download_button_placeholder.empty()
 
 def generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_descriptions):
     buffer = BytesIO()
