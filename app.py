@@ -3,6 +3,15 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import pandas as pd
 from PIL import Image
+import pdfkit
+from jinja2 import Template
+import base64
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Frame, KeepInFrame
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from io import BytesIO
 
 def main():
     st.set_page_config(page_title="ROI Calculator", page_icon="📊", layout="wide")
@@ -203,6 +212,25 @@ def main():
     .tooltip:hover .tooltiptext {
         visibility: visible;
         opacity: 1;
+    }
+    .stDownloadButton > button {
+        color: white !important;
+        background-color: #0077BE !important;
+        border-color: #0077BE !important;
+    }
+    .stDownloadButton > button:hover {
+        background-color: #005c91 !important;
+        border-color: #005c91 !important;
+    }
+    .stDownloadButton > button * {
+        color: white !important;
+    }
+
+    /* Ensure text color for any child elements */
+    .stDownloadButton > button span,
+    .stDownloadButton > button p,
+    .stDownloadButton > button div {
+        color: white !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -514,8 +542,131 @@ def main():
                 # Display the table with left-aligned headers
                 st.markdown(hover_cost_per_integration_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
 
+                # Generate PDF data
+                pdf_data = generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_descriptions)
+
+                # Display the download button above the savings box
+                st.download_button(
+                    label="Download Report",
+                    data=pdf_data,
+                    file_name="roi_report.pdf",
+                    mime="application/pdf"
+                )
+
+                # Add some space between the button and the savings box
             except Exception as e:
                 st.error(f"An error occurred during calculation: {str(e)}")
+
+def generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_descriptions):
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch, leftMargin=0.5*inch, rightMargin=0.5*inch)
+    elements = []
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'Title',
+        parent=styles['Heading1'],
+        fontSize=24,
+        textColor=colors.HexColor("#0077BE"),
+        spaceAfter=0.3*inch,
+        alignment=1  # Center alignment
+    )
+    subtitle_style = ParagraphStyle(
+        'Subtitle',
+        parent=styles['Heading2'],
+        fontSize=18,
+        textColor=colors.HexColor("#0077BE"),
+        spaceAfter=0.2*inch,
+        spaceBefore=0.2*inch
+    )
+    body_style = ParagraphStyle(
+        'Body',
+        parent=styles['BodyText'],
+        fontSize=12,
+        textColor=colors.black,
+        spaceAfter=0.1*inch
+    )
+
+    # Add title
+    elements.append(Paragraph("ROI Calculator Report", title_style))
+
+    # Create a box for total savings
+    savings_box = Table([
+        [Paragraph(f"Total 5 Year Cost Savings with SnapLogic", subtitle_style)],
+        [Paragraph(f"<font size=18>${int(round(total_savings * 5)):,}</font>", body_style)],
+        [Paragraph(f"Annual Cost Savings", subtitle_style)],
+        [Paragraph(f"<font size=16>${int(round(total_savings)):,}</font>", body_style)]
+    ], colWidths=[6*inch])
+    
+    savings_box.setStyle(TableStyle([
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('BOX', (0, 0), (-1, -1), 2, colors.HexColor("#0077BE")),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#F0F8FF")),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor("#0077BE")),
+        ('TOPPADDING', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    
+    elements.append(savings_box)
+    elements.append(Spacer(1, 0.3*inch))
+
+    # Add savings breakdown table
+    elements.append(Paragraph("Savings Breakdown (Annual)", subtitle_style))
+    savings_data = [savings_df.columns.tolist()] + savings_df.values.tolist()
+    savings_table = Table(savings_data, colWidths=[3*inch, 2*inch])
+    savings_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F8FF")),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor("#0077BE"))
+    ]))
+    elements.append(savings_table)
+    elements.append(Spacer(1, 0.3*inch))
+
+    # Add cost per integration table
+    elements.append(Paragraph("Cost Per Integration (Annual)", subtitle_style))
+    cost_data = [[Paragraph(cell, body_style) for cell in row] for row in [savings_per_integration_df.columns.tolist()] + savings_per_integration_df.values.tolist()]
+    cost_table = Table(cost_data, colWidths=[2.5*inch, 1.75*inch, 1.75*inch])
+    cost_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 14),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F8FF")),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 12),
+        ('TOPPADDING', (0, 1), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor("#0077BE"))
+    ]))
+    elements.append(cost_table)
+    elements.append(Spacer(1, 0.3*inch))
+
+    # Add glossary
+    elements.append(Paragraph("Glossary", subtitle_style))
+    for term, description in hover_descriptions.items():
+        elements.append(Paragraph(f"<b>{term}:</b> {description}", body_style))
+        elements.append(Spacer(1, 0.1*inch))
+
+    doc.build(elements)
+    pdf_content = buffer.getvalue()
+    buffer.close()
+    return pdf_content
 
 if __name__ == "__main__":
     main()
