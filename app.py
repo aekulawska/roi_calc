@@ -2,16 +2,18 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import pandas as pd
-from PIL import Image
+from PIL import Image as PILImage
 import pdfkit
 from jinja2 import Template
 import base64
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Frame, KeepInFrame
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
+from reportlab.lib.units import inch, cm
 from io import BytesIO
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from datetime import datetime
 
 def main():
     st.set_page_config(page_title="ROI Calculator", page_icon="📊", layout="wide")
@@ -236,7 +238,7 @@ def main():
     """, unsafe_allow_html=True)
 
     # Add SnapLogic logo
-    logo = Image.open("snaplogic_logo.png")
+    logo = PILImage.open("snaplogic_logo.png")
     st.markdown('<div class="logo-container">', unsafe_allow_html=True)
     st.image(logo, width=200)  # Adjust the width as needed
     st.markdown('</div>', unsafe_allow_html=True)
@@ -561,33 +563,44 @@ def main():
 
 def generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_descriptions):
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch, leftMargin=0.5*inch, rightMargin=0.5*inch)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=1*cm, bottomMargin=1*cm, leftMargin=1.5*cm, rightMargin=1.5*cm)
     elements = []
 
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
         'Title',
         parent=styles['Heading1'],
-        fontSize=24,
+        fontSize=18,
         textColor=colors.HexColor("#0077BE"),
-        spaceAfter=0.3*inch,
-        alignment=1  # Center alignment
+        spaceAfter=0.5*cm,
+        alignment=TA_CENTER
     )
     subtitle_style = ParagraphStyle(
         'Subtitle',
         parent=styles['Heading2'],
-        fontSize=18,
+        fontSize=14,
         textColor=colors.HexColor("#0077BE"),
-        spaceAfter=0.2*inch,
-        spaceBefore=0.2*inch
+        spaceAfter=0.3*cm,
+        spaceBefore=0.3*cm
     )
     body_style = ParagraphStyle(
         'Body',
         parent=styles['BodyText'],
-        fontSize=12,
+        fontSize=9,
         textColor=colors.black,
-        spaceAfter=0.1*inch
+        spaceAfter=0.2*cm
     )
+
+    # Add logo
+    pil_img = PILImage.open("snaplogic_logo.png")
+    img_width, img_height = pil_img.size
+    aspect = img_height / float(img_width)
+    desired_width = 4 * cm
+    desired_height = desired_width * aspect
+
+    logo = Image("snaplogic_logo.png", width=desired_width, height=desired_height)
+    elements.append(logo)
+    elements.append(Spacer(1, 0.5*cm))
 
     # Add title
     elements.append(Paragraph("ROI Calculator Report", title_style))
@@ -595,77 +608,85 @@ def generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_de
     # Create a box for total savings
     savings_box = Table([
         [Paragraph(f"Total 5 Year Cost Savings with SnapLogic", subtitle_style)],
-        [Paragraph(f"<font size=18>${int(round(total_savings * 5)):,}</font>", body_style)],
+        [Paragraph(f"<font size=14>${int(round(total_savings * 5)):,}</font>", body_style)],
         [Paragraph(f"Annual Cost Savings", subtitle_style)],
-        [Paragraph(f"<font size=16>${int(round(total_savings)):,}</font>", body_style)]
-    ], colWidths=[6*inch])
+        [Paragraph(f"<font size=12>${int(round(total_savings)):,}</font>", body_style)]
+    ], colWidths=[doc.width])
     
     savings_box.setStyle(TableStyle([
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('BOX', (0, 0), (-1, -1), 2, colors.HexColor("#0077BE")),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor("#0077BE")),
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#F0F8FF")),
         ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor("#0077BE")),
-        ('TOPPADDING', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+        ('TOPPADDING', (0, 0), (-1, -1), 6),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
     ]))
     
     elements.append(savings_box)
-    elements.append(Spacer(1, 0.3*inch))
+    elements.append(Spacer(1, 0.5*cm))
 
     # Add savings breakdown table
     elements.append(Paragraph("Savings Breakdown (Annual)", subtitle_style))
     savings_data = [savings_df.columns.tolist()] + savings_df.values.tolist()
-    savings_table = Table(savings_data, colWidths=[3*inch, 2*inch])
+    savings_table = Table(savings_data, colWidths=[doc.width*0.6, doc.width*0.4])
     savings_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 14),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
         ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F8FF")),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 12),
-        ('TOPPADDING', (0, 1), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor("#0077BE"))
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('TOPPADDING', (0, 1), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#0077BE"))
     ]))
     elements.append(savings_table)
-    elements.append(Spacer(1, 0.3*inch))
+    elements.append(Spacer(1, 0.5*cm))
 
     # Add cost per integration table
     elements.append(Paragraph("Cost Per Integration (Annual)", subtitle_style))
     cost_data = [[Paragraph(cell, body_style) for cell in row] for row in [savings_per_integration_df.columns.tolist()] + savings_per_integration_df.values.tolist()]
-    cost_table = Table(cost_data, colWidths=[2.5*inch, 1.75*inch, 1.75*inch])
+    cost_table = Table(cost_data, colWidths=[doc.width*0.4, doc.width*0.3, doc.width*0.3])
     cost_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 14),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
         ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F8FF")),
         ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 12),
-        ('TOPPADDING', (0, 1), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor("#0077BE"))
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('TOPPADDING', (0, 1), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#0077BE"))
     ]))
     elements.append(cost_table)
-    elements.append(Spacer(1, 0.3*inch))
+    elements.append(Spacer(1, 0.5*cm))
 
     # Add glossary
     elements.append(Paragraph("Glossary", subtitle_style))
     for term, description in hover_descriptions.items():
         elements.append(Paragraph(f"<b>{term}:</b> {description}", body_style))
-        elements.append(Spacer(1, 0.1*inch))
+        elements.append(Spacer(1, 0.1*cm))
 
-    doc.build(elements)
+    # Add footer
+    def add_footer(canvas, doc):
+        canvas.saveState()
+        canvas.setFont('Helvetica', 8)
+        canvas.drawString(1.5*cm, 0.75*cm, f"Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        canvas.drawRightString(doc.pagesize[0] - 1.5*cm, 0.75*cm, f"Page {canvas.getPageNumber()}")
+        canvas.restoreState()
+
+    doc.build(elements, onFirstPage=add_footer, onLaterPages=add_footer)
     pdf_content = buffer.getvalue()
     buffer.close()
     return pdf_content
