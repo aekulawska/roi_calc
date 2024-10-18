@@ -554,6 +554,8 @@ def main():
                 )
 
                 # Add some space between the button and the savings box
+                st.markdown("<br>", unsafe_allow_html=True)
+
             except Exception as e:
                 st.error(f"An error occurred during calculation: {str(e)}")
 
