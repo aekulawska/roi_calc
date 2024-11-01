@@ -630,9 +630,9 @@ def main():
             # Set default values (convert 500 annual tasks to ~2 daily tasks: 500/250 working days)
             default_values = {
                 "Annual FTE Salary ($)": 75000,
-                "Number of Employees": 5,
-                "Original Time per Task (Hours)": 1.0,
-                "Number of Tasks per Day": 5,  # Changed from annual to daily
+                "Number of Employees": 10,
+                "Original Time per Task (Hours)": 0.5,
+                "Number of Tasks per Day": 8,  # Changed from annual to daily
                 "Time Reduction (%)": 80
             }
 
@@ -789,8 +789,8 @@ def main():
             default_values_ins = {
                 "Without SnapLogic": {
                     "Number of Successful Applicants per Year": 1000,
-                    "Percentage Needing Underwriting (%)": 40,
-                    "Income per Underwritten Applicant per Year ($)": 6000
+                    "Percentage Needing Underwriting (%)": 20,
+                    "Income per Underwritten Applicant per Year ($)": 5000
                 },
                 "With SnapLogic": {
                     "Efficiency Gain with SnapLogic (%)": 80
