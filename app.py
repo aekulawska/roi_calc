@@ -769,6 +769,21 @@ def main():
                 st.subheader("Time Savings Analysis")
                 st.markdown(time_savings_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
 
+                # Prepare data for PDF
+                genai_data = {
+                    'total_savings': annual_savings,
+                    'analysis_df': time_savings_df
+                }
+
+                # Display the download button in the placeholder
+                with genai_col2:
+                    genai_download_placeholder.download_button(
+                        label="Download Report",
+                        data=generate_pdf("genai", genai_data),
+                        file_name="genai_roi_report.pdf",
+                        mime="application/pdf"
+                    )
+
     with tab3:
         st.markdown("""
         <div class="description-box">
@@ -897,7 +912,22 @@ def main():
                 st.subheader("Application Processing Analysis")
                 st.markdown(analysis_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
 
-def generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_descriptions):
+                # Prepare data for PDF
+                insurance_data = {
+                    'total_savings': revenue_increase,
+                    'analysis_df': analysis_df
+                }
+
+                # Display the download button in the placeholder
+                with ins_col2:
+                    ins_download_placeholder.download_button(
+                        label="Download Report",
+                        data=generate_pdf("insurance", insurance_data),
+                        file_name="insurance_roi_report.pdf",
+                        mime="application/pdf"
+                    )
+
+def generate_pdf(calculator_type, data, hover_descriptions=None):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=1*cm, bottomMargin=1*cm, leftMargin=1.5*cm, rightMargin=1.5*cm)
     elements = []
@@ -933,20 +963,29 @@ def generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_de
     aspect = img_height / float(img_width)
     desired_width = 4 * cm
     desired_height = desired_width * aspect
-
     logo = Image("snaplogic_logo.png", width=desired_width, height=desired_height)
     elements.append(logo)
     elements.append(Spacer(1, 0.5*cm))
 
-    # Add title
-    elements.append(Paragraph("ROI Calculator Report", title_style))
+    # Add title based on calculator type
+    if calculator_type == "integration":
+        title = "Integration ROI Calculator Report"
+        savings_text = "Cost Savings"
+    elif calculator_type == "genai":
+        title = "Gen AI ROI Calculator Report"
+        savings_text = "Cost Savings"
+    else:  # insurance
+        title = "Insurance ROI Calculator Report"
+        savings_text = "Revenue Increase"
 
-    # Create a box for total savings
+    elements.append(Paragraph(title, title_style))
+
+    # Create a box for total savings/revenue
     savings_box = Table([
-        [Paragraph(f"Total 5 Year Cost Savings with SnapLogic", subtitle_style)],
-        [Paragraph(f"<font size=14>${int(round(total_savings * 5)):,}</font>", body_style)],
-        [Paragraph(f"Annual Cost Savings", subtitle_style)],
-        [Paragraph(f"<font size=12>${int(round(total_savings)):,}</font>", body_style)]
+        [Paragraph(f"Total 5 Year {savings_text} with SnapLogic", subtitle_style)],
+        [Paragraph(f"<font size=14>${int(round(data['total_savings'] * 5)):,}</font>", body_style)],
+        [Paragraph(f"Annual {savings_text}", subtitle_style)],
+        [Paragraph(f"<font size=12>${int(round(data['total_savings'])):,}</font>", body_style)]
     ], colWidths=[doc.width])
     
     savings_box.setStyle(TableStyle([
@@ -962,11 +1001,13 @@ def generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_de
     elements.append(savings_box)
     elements.append(Spacer(1, 0.5*cm))
 
-    # Add savings breakdown table
-    elements.append(Paragraph("Savings Breakdown (Annual)", subtitle_style))
-    savings_data = [savings_df.columns.tolist()] + savings_df.values.tolist()
-    savings_table = Table(savings_data, colWidths=[doc.width*0.6, doc.width*0.4])
-    savings_table.setStyle(TableStyle([
+    # Add analysis table
+    elements.append(Paragraph("Analysis Breakdown", subtitle_style))
+    analysis_data = [[Paragraph(cell, body_style) for cell in row] for row in data['analysis_df'].values.tolist()]
+    analysis_data.insert(0, [Paragraph(col, body_style) for col in data['analysis_df'].columns])
+    
+    analysis_table = Table(analysis_data, colWidths=[doc.width*0.6, doc.width*0.4])
+    analysis_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
@@ -982,37 +1023,15 @@ def generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_de
         ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#0077BE"))
     ]))
-    elements.append(savings_table)
+    elements.append(analysis_table)
     elements.append(Spacer(1, 0.5*cm))
 
-    # Add cost per integration table
-    elements.append(Paragraph("Cost Per Integration (Annual)", subtitle_style))
-    cost_data = [[Paragraph(cell, body_style) for cell in row] for row in [savings_per_integration_df.columns.tolist()] + savings_per_integration_df.values.tolist()]
-    cost_table = Table(cost_data, colWidths=[doc.width*0.4, doc.width*0.3, doc.width*0.3])
-    cost_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F8FF")),
-        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('TOPPADDING', (0, 1), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#0077BE"))
-    ]))
-    elements.append(cost_table)
-    elements.append(Spacer(1, 0.5*cm))
-
-    # Add glossary
-    elements.append(Paragraph("Glossary", subtitle_style))
-    for term, description in hover_descriptions.items():
-        elements.append(Paragraph(f"<b>{term}:</b> {description}", body_style))
-        elements.append(Spacer(1, 0.1*cm))
+    # Add descriptions if available
+    if hover_descriptions:
+        elements.append(Paragraph("Glossary", subtitle_style))
+        for term, description in hover_descriptions.items():
+            elements.append(Paragraph(f"<b>{term}:</b> {description}", body_style))
+            elements.append(Spacer(1, 0.1*cm))
 
     # Add footer
     def add_footer(canvas, doc):
