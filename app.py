@@ -590,14 +590,21 @@ def main():
                     # Display the table with left-aligned headers
                     st.markdown(hover_cost_per_integration_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
 
-                    # Generate PDF data
-                    pdf_data = generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_descriptions)
+                    # For Integrations tab
+                    # Prepare data for PDF with both tables and hover descriptions
+                    integration_data = {
+                        'total_savings': total_savings,
+                        'analysis_df': savings_df,
+                        'cost_per_integration_df': savings_per_integration_df,  # Add the second table
+                        'hover_descriptions': hover_descriptions,  # Add hover descriptions for glossary
+                        'cost_per_integration_descriptions': cost_per_integration_descriptions  # Add second table descriptions
+                    }
 
                     # Display the download button in the placeholder
                     with col2:
                         download_button_placeholder.download_button(
                             label="Download Report",
-                            data=pdf_data,
+                            data=generate_pdf("integration", integration_data),  # Only pass calculator type and data
                             file_name="roi_report.pdf",
                             mime="application/pdf"
                         )
@@ -769,6 +776,7 @@ def main():
                 st.subheader("Time Savings Analysis")
                 st.markdown(time_savings_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
 
+                # For Gen AI tab
                 # Prepare data for PDF
                 genai_data = {
                     'total_savings': annual_savings,
@@ -779,7 +787,7 @@ def main():
                 with genai_col2:
                     genai_download_placeholder.download_button(
                         label="Download Report",
-                        data=generate_pdf("genai", genai_data),
+                        data=generate_pdf("genai", genai_data),  # Only pass calculator type and data
                         file_name="genai_roi_report.pdf",
                         mime="application/pdf"
                     )
@@ -912,6 +920,7 @@ def main():
                 st.subheader("Application Processing Analysis")
                 st.markdown(analysis_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
 
+                # For Insurance tab
                 # Prepare data for PDF
                 insurance_data = {
                     'total_savings': revenue_increase,
@@ -922,12 +931,12 @@ def main():
                 with ins_col2:
                     ins_download_placeholder.download_button(
                         label="Download Report",
-                        data=generate_pdf("insurance", insurance_data),
+                        data=generate_pdf("insurance", insurance_data),  # Only pass calculator type and data
                         file_name="insurance_roi_report.pdf",
                         mime="application/pdf"
                     )
 
-def generate_pdf(calculator_type, data, hover_descriptions=None):
+def generate_pdf(calculator_type, data):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=1*cm, bottomMargin=1*cm, leftMargin=1.5*cm, rightMargin=1.5*cm)
     elements = []
@@ -1001,37 +1010,92 @@ def generate_pdf(calculator_type, data, hover_descriptions=None):
     elements.append(savings_box)
     elements.append(Spacer(1, 0.5*cm))
 
-    # Add analysis table
-    elements.append(Paragraph("Analysis Breakdown", subtitle_style))
-    analysis_data = [[Paragraph(cell, body_style) for cell in row] for row in data['analysis_df'].values.tolist()]
-    analysis_data.insert(0, [Paragraph(col, body_style) for col in data['analysis_df'].columns])
-    
-    analysis_table = Table(analysis_data, colWidths=[doc.width*0.6, doc.width*0.4])
-    analysis_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F8FF")),
-        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('TOPPADDING', (0, 1), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#0077BE"))
-    ]))
-    elements.append(analysis_table)
-    elements.append(Spacer(1, 0.5*cm))
+    # Add analysis tables based on calculator type
+    if calculator_type == "integration":
+        # First table - Savings Breakdown
+        elements.append(Paragraph("Savings Breakdown (Annual)", subtitle_style))
+        analysis_data = [[Paragraph(cell, body_style) for cell in row] for row in data['analysis_df'].values.tolist()]
+        analysis_data.insert(0, [Paragraph(col, body_style) for col in data['analysis_df'].columns])
+        
+        analysis_table = Table(analysis_data, colWidths=[doc.width*0.6, doc.width*0.4])
+        analysis_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F8FF")),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('TOPPADDING', (0, 1), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#0077BE"))
+        ]))
+        elements.append(analysis_table)
+        elements.append(Spacer(1, 0.5*cm))
 
-    # Add descriptions if available
-    if hover_descriptions:
-        elements.append(Paragraph("Glossary", subtitle_style))
-        for term, description in hover_descriptions.items():
-            elements.append(Paragraph(f"<b>{term}:</b> {description}", body_style))
-            elements.append(Spacer(1, 0.1*cm))
+        # Second table - Cost Per Integration
+        elements.append(Paragraph("Cost Per Integration (Annual)", subtitle_style))
+        cost_data = [[Paragraph(cell, body_style) for cell in row] for row in data['cost_per_integration_df'].values.tolist()]
+        cost_data.insert(0, [Paragraph(col, body_style) for col in data['cost_per_integration_df'].columns])
+        
+        cost_table = Table(cost_data, colWidths=[doc.width*0.4, doc.width*0.3, doc.width*0.3])
+        cost_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F8FF")),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('TOPPADDING', (0, 1), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#0077BE"))
+        ]))
+        elements.append(cost_table)
+        elements.append(Spacer(1, 0.5*cm))
+
+        # Add glossary sections
+        if 'hover_descriptions' in data:
+            elements.append(Paragraph("Glossary", subtitle_style))
+            for term, description in data['hover_descriptions'].items():
+                elements.append(Paragraph(f"<b>{term}:</b> {description}", body_style))
+                elements.append(Spacer(1, 0.1*cm))
+            
+            elements.append(Spacer(1, 0.3*cm))
+
+    else:
+        # For Gen AI and Insurance tabs - single table
+        elements.append(Paragraph("Analysis Breakdown", subtitle_style))
+        analysis_data = [[Paragraph(cell, body_style) for cell in row] for row in data['analysis_df'].values.tolist()]
+        analysis_data.insert(0, [Paragraph(col, body_style) for col in data['analysis_df'].columns])
+        
+        analysis_table = Table(analysis_data, colWidths=[doc.width*0.6, doc.width*0.4])
+        analysis_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#0077BE")),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor("#F0F8FF")),
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('TOPPADDING', (0, 1), (-1, -1), 4),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 4),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor("#0077BE"))
+        ]))
+        elements.append(analysis_table)
+        elements.append(Spacer(1, 0.5*cm))
 
     # Add footer
     def add_footer(canvas, doc):
