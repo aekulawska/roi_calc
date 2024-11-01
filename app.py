@@ -71,26 +71,30 @@ def main():
         padding: 15px;
         border: 2px solid #0077BE;
         border-radius: 5px;
-        display: inline-block;
+        display: block;
         background-color: var(--background-color);
+        text-align: center;
+        width: 100%;
     }
     .dataframe {
         width: 100%;
-        text-align: left;
+        text-align: center;
         border-collapse: collapse;
         color: var(--text-color);
+        margin: 0 auto;
     }
     .dataframe th {
         background-color: #0077BE;
         color: white;
         font-weight: bold;
         padding: 10px;
-        text-align: left;  /* Add this line to left-align column names */
+        text-align: center;
     }
     .dataframe td {
         padding: 10px;
         border-bottom: 1px solid var(--border-color);
         color: var(--text-color);
+        text-align: center;
     }
     .dataframe tr:nth-of-type(even) {
         background-color: var(--even-row-color);
@@ -274,6 +278,12 @@ def main():
     }
     .button-container > div {
         flex: 0 0 auto;
+    }
+
+    /* Add styles for subheaders */
+    .stSubheader {
+        text-align: center !important;
+        width: 100%;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -465,45 +475,18 @@ def main():
 
                     # Replace the tabs with a single box showing 5-year and annual savings
                     st.markdown("""
-                    <div class="total-savings">
-                        <h2>Total 5 Year Cost Savings with SnapLogic</h2>
-                        <div class="big-savings">${:,}</div>
-                        <h3>Annual Cost Savings</h3>
-                        <div class="annual-savings">${:,}</div>
+                    <div style="display: flex; justify-content: center; width: 100%;">
+                        <div class="total-savings">
+                            <h2 style="color: #0077BE; margin-bottom: 10px;">Total 5 Year Cost Savings with SnapLogic</h2>
+                            <div style="font-size: 48px; font-weight: bold; color: #0077BE; margin-bottom: 20px;">${:,}</div>
+                            <h3 style="color: #0077BE; margin-bottom: 5px;">Annual Cost Savings</h3>
+                            <div style="font-size: 24px; font-weight: bold; color: #0077BE;">${:,}</div>
+                        </div>
                     </div>
-                    """.format(int(round(total_savings * 5)), int(round(total_savings))), unsafe_allow_html=True)
-
-                    # Add this CSS to your existing styles
-                    st.markdown("""
-                    <style>
-                    .total-savings {
-                        text-align: center;
-                        padding: 20px;
-                        border: 2px solid #0077BE;
-                        border-radius: 10px;
-                        background-color: var(--background-color);
-                    }
-                    .total-savings h2 {
-                        color: #0077BE;
-                        margin-bottom: 10px;
-                    }
-                    .big-savings {
-                        font-size: 48px;
-                        font-weight: bold;
-                        color: #0077BE;
-                        margin-bottom: 20px;
-                    }
-                    .total-savings h3 {
-                        color: #0077BE;
-                        margin-bottom: 5px;
-                    }
-                    .annual-savings {
-                        font-size: 24px;
-                        font-weight: bold;
-                        color: #0077BE;
-                    }
-                    </style>
-                    """, unsafe_allow_html=True)
+                    """.format(
+                        int(round(total_savings * 5)),
+                        int(round(total_savings))
+                    ), unsafe_allow_html=True)
 
                     # Create a dataframe for the savings table
                     savings_data = {
@@ -735,11 +718,13 @@ def main():
 
                 # Display results in the same style as Integration tab
                 st.markdown("""
-                <div class="total-savings">
-                    <h2>Total 5 Year Cost Savings with SnapLogic</h2>
-                    <div class="big-savings">${:,}</div>
-                    <h3>Annual Cost Savings</h3>
-                    <div class="annual-savings">${:,}</div>
+                <div style="display: flex; justify-content: center; width: 100%;">
+                    <div class="total-savings">
+                        <h2 style="color: #0077BE; margin-bottom: 10px;">Total 5 Year Cost Savings with SnapLogic</h2>
+                        <div style="font-size: 48px; font-weight: bold; color: #0077BE; margin-bottom: 20px;">${:,}</div>
+                        <h3 style="color: #0077BE; margin-bottom: 5px;">Annual Cost Savings</h3>
+                        <div style="font-size: 24px; font-weight: bold; color: #0077BE;">${:,}</div>
+                    </div>
                 </div>
                 """.format(
                     int(round(annual_savings * 5)),
@@ -880,11 +865,13 @@ def main():
 
                 # Display results
                 st.markdown("""
-                <div class="total-savings">
-                    <h2>Total 5 Year Revenue Increase with SnapLogic</h2>
-                    <div class="big-savings">${:,}</div>
-                    <h3>Annual Revenue Increase</h3>
-                    <div class="annual-savings">${:,}</div>
+                <div style="display: flex; justify-content: center; width: 100%;">
+                    <div class="total-savings">
+                        <h2 style="color: #0077BE; margin-bottom: 10px;">Total 5 Year Revenue Increase with SnapLogic</h2>
+                        <div style="font-size: 48px; font-weight: bold; color: #0077BE; margin-bottom: 20px;">${:,}</div>
+                        <h3 style="color: #0077BE; margin-bottom: 5px;">Annual Revenue Increase</h3>
+                        <div style="font-size: 24px; font-weight: bold; color: #0077BE;">${:,}</div>
+                    </div>
                 </div>
                 """.format(
                     int(round(revenue_increase * 5)),
