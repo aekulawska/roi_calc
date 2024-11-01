@@ -644,12 +644,12 @@ def main():
             # Toggle for example/custom values
             use_example_genai = st.toggle("Use Example Values", value=True, key="genai_toggle")
 
-            # Set default values
+            # Set default values (convert 500 annual tasks to ~2 daily tasks: 500/250 working days)
             default_values = {
                 "Annual FTE Salary ($)": 75000,
-                "Number of Employees": 10,
-                "Original Time per Task (Hours)": 2.0,
-                "Number of Tasks per Year": 500,
+                "Number of Employees": 5,
+                "Original Time per Task (Hours)": 1.0,
+                "Number of Tasks per Day": 5,  # Changed from annual to daily
                 "Time Reduction (%)": 80
             }
 
@@ -671,23 +671,23 @@ def main():
                     "Number of Employees": st.number_input(
                         "Number of Employees:",
                         min_value=1,
-                        value=default_values["Number of Employees"],  # Use default value
+                        value=default_values["Number of Employees"],
                         disabled=use_example_genai,
                         key="genai_employees"
                     ),
                     "Original Time per Task (Hours)": st.number_input(
                         "Original Time per Task (Hours):",
                         min_value=0.1,
-                        value=default_values["Original Time per Task (Hours)"],  # Use default value
+                        value=default_values["Original Time per Task (Hours)"],
                         step=0.1,
                         format="%.1f",
                         disabled=use_example_genai,
                         key="genai_original_time"
                     ),
-                    "Number of Tasks per Year": st.number_input(
-                        "Number of Tasks per Year:",
+                    "Number of Tasks per Day": st.number_input(
+                        "Number of Tasks per Day per Employee:",  # Updated label to be more specific
                         min_value=1,
-                        value=default_values["Number of Tasks per Year"],  # Use default value
+                        value=default_values["Number of Tasks per Day"],
                         disabled=use_example_genai,
                         key="genai_tasks"
                     )
@@ -718,12 +718,15 @@ def main():
         with right_column_genai:
             if genai_submit_button:
                 # Calculate Gen AI ROI
-                hourly_rate = genai_values["Annual Salary"] / 2080  # 2080 is working hours per year
+                hourly_rate = genai_values["Annual Salary"] / 2080
+                annual_tasks_per_employee = genai_values["Number of Tasks per Day"] * 250  # Convert daily to annual per employee
+                total_annual_tasks = annual_tasks_per_employee * genai_values["Number of Employees"]  # Multiply by number of employees
+                
                 original_cost = (
-                    genai_values["Number of Employees"] *
-                    genai_values["Original Time per Task (Hours)"] *
-                    hourly_rate *
-                    genai_values["Number of Tasks per Year"]
+                    genai_values["Number of Employees"] *  # Number of employees
+                    genai_values["Original Time per Task (Hours)"] *  # Hours per task
+                    hourly_rate *  # Cost per hour
+                    annual_tasks_per_employee  # Tasks per employee per year
                 )
                 
                 time_reduction = genai_values["Time Reduction (%)"] / 100
@@ -743,21 +746,36 @@ def main():
                     int(round(annual_savings))
                 ), unsafe_allow_html=True)
 
+                # For time savings calculations
+                total_hours_saved = (
+                    genai_values["Number of Employees"] *  # Total employees
+                    genai_values["Original Time per Task (Hours)"] *  # Hours per task
+                    annual_tasks_per_employee *  # Tasks per employee per year
+                    time_reduction
+                )
+                
+                average_hours_saved_per_employee = (
+                    genai_values["Original Time per Task (Hours)"] *  # Hours per task
+                    annual_tasks_per_employee *  # Tasks per employee per year
+                    time_reduction
+                )
+
+                time_saved_per_task = (
+                    genai_values["Original Time per Task (Hours)"] *  # Hours per task
+                    time_reduction  # Reduction percentage
+                )
+
                 # Create time savings table
                 time_savings_data = {
-                    "Category": ["Total Hours Saved per Year", "Average Hours Saved per Employee"],
+                    "Category": [
+                        "Total Hours Saved per Year", 
+                        "Average Hours Saved per Employee",
+                        "Average Hours Saved per Task"
+                    ],
                     "Amount": [
-                        "{:,.0f}".format(
-                            genai_values["Number of Employees"] *
-                            genai_values["Original Time per Task (Hours)"] *
-                            genai_values["Number of Tasks per Year"] *
-                            time_reduction
-                        ),
-                        "{:,.0f}".format(
-                            genai_values["Original Time per Task (Hours)"] *
-                            genai_values["Number of Tasks per Year"] *
-                            time_reduction
-                        )
+                        "{:,.0f}".format(total_hours_saved),
+                        "{:,.0f}".format(average_hours_saved_per_employee),
+                        "{:.1f}".format(time_saved_per_task)
                     ]
                 }
                 time_savings_df = pd.DataFrame(time_savings_data)
