@@ -287,14 +287,14 @@ def main():
     st.title("ROI Calculator")
 
     # Create main tabs
-    tab1, tab2 = st.tabs(["Integration", "Gen AI"])
+    tab1, tab2, tab3 = st.tabs(["Integration", "Gen AI", "Insurance Underwriting"])
 
     with tab1:
         # Add description in a compact pretty box spanning both columns
         st.markdown("""
         <div class="description-box">
             <h4>Integration ROI Calculator</h4>
-            <p>Calculate the ROI from implementing Data and Application Integrations on SnapLogic.</p>
+            <p>Calculate cost savings from implementing Data and Application Integrations on SnapLogic.</p>
             <p>Please enter your parameters below 👩🏻‍💻</p>
         </div>
         """, unsafe_allow_html=True)
@@ -632,7 +632,7 @@ def main():
         st.markdown("""
         <div class="description-box">
             <h4>Gen AI ROI Calculator</h4>
-            <p>Calculate the ROI from implementing Generative AI solutions on SnapLogic.</p>
+            <p>Calculate cost savings from implementing Generative AI solutions on SnapLogic.</p>
             <p>Please enter your parameters below 👩🏻‍💻</p>
         </div>
         """, unsafe_allow_html=True)
@@ -783,6 +783,132 @@ def main():
                 # Display the time savings table
                 st.subheader("Time Savings Analysis")
                 st.markdown(time_savings_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
+
+    with tab3:
+        st.markdown("""
+        <div class="description-box">
+            <h4>Insurance ROI Calculator</h4>
+            <p>Calculate revenue increase from implementing Gen AI solutions for insurance underwriting with SnapLogic.</p>
+            <p>Please enter your parameters below 👩🏻‍💻</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Create two columns
+        left_column_ins, right_column_ins = st.columns(2)
+
+        with left_column_ins:
+            # Toggle for example/custom values
+            use_example_ins = st.toggle("Use Example Values", value=True, key="insurance_toggle")
+
+            # Set default values
+            default_values_ins = {
+                "Without SnapLogic": {
+                    "Number of Successful Applicants per Year": 1000,
+                    "Percentage Needing Underwriting (%)": 40,
+                    "Income per Underwritten Applicant per Year ($)": 6000
+                },
+                "With SnapLogic": {
+                    "Efficiency Gain with SnapLogic (%)": 80
+                }
+            }
+
+            # Create input sections using expanders
+            with st.expander("Without SnapLogic", expanded=False):
+                ins_values = {
+                    "applicants": st.number_input(
+                        "Number of Successful Applicants per Year:",
+                        min_value=1,
+                        value=default_values_ins["Without SnapLogic"]["Number of Successful Applicants per Year"],
+                        step=100,
+                        disabled=use_example_ins,
+                        key="ins_applicants"
+                    ),
+                    "underwriting_percentage": st.number_input(
+                        "Percentage Needing Underwriting (%):",
+                        min_value=0,
+                        max_value=100,
+                        value=default_values_ins["Without SnapLogic"]["Percentage Needing Underwriting (%)"],
+                        step=1,
+                        disabled=use_example_ins,
+                        key="ins_underwriting_pct"
+                    ),
+                    "income_per_applicant": st.number_input(
+                        "Income per Underwritten Applicant per Year ($):",
+                        min_value=1,
+                        value=default_values_ins["Without SnapLogic"]["Income per Underwritten Applicant per Year ($)"],
+                        step=100,
+                        disabled=use_example_ins,
+                        key="ins_income"
+                    )
+                }
+
+            with st.expander("With SnapLogic", expanded=False):
+                ins_values.update({
+                    "efficiency_gain": st.number_input(
+                        "Efficiency Gain with SnapLogic (%):",
+                        min_value=0,
+                        max_value=100,
+                        value=default_values_ins["With SnapLogic"]["Efficiency Gain with SnapLogic (%)"],
+                        disabled=use_example_ins,
+                        key="ins_efficiency"
+                    )
+                })
+
+            # Create a container for the submit button
+            ins_button_container = st.container()
+            ins_col1, ins_col2, _ = ins_button_container.columns([1, 1.5, 2])
+
+            with ins_col1:
+                ins_submit_button = st.button("Submit", key="insurance_submit")
+
+            with ins_col2:
+                ins_download_placeholder = st.empty()
+
+        with right_column_ins:
+            if ins_submit_button:
+                # Calculate current revenue
+                current_underwritten = (
+                    ins_values["applicants"] * 
+                    (ins_values["underwriting_percentage"] / 100)
+                )
+                current_revenue = current_underwritten * ins_values["income_per_applicant"]
+
+                # Calculate potential revenue with efficiency gain
+                additional_capacity = current_underwritten * (ins_values["efficiency_gain"] / 100)
+                new_revenue = (current_underwritten + additional_capacity) * ins_values["income_per_applicant"]
+                revenue_increase = new_revenue - current_revenue
+
+                # Display results
+                st.markdown("""
+                <div class="total-savings">
+                    <h2>Total 5 Year Revenue Increase with SnapLogic</h2>
+                    <div class="big-savings">${:,}</div>
+                    <h3>Annual Revenue Increase</h3>
+                    <div class="annual-savings">${:,}</div>
+                </div>
+                """.format(
+                    int(round(revenue_increase * 5)),
+                    int(round(revenue_increase))
+                ), unsafe_allow_html=True)
+
+                # Create analysis table
+                analysis_data = {
+                    "Category": [
+                        "Current Underwritten Applications per Year",
+                        "Additional Applications with SnapLogic",
+                        "Total Potential Applications per Year"
+                    ],
+                    "Amount": [
+                        "{:,.0f}".format(current_underwritten),
+                        "{:,.0f}".format(additional_capacity),
+                        "{:,.0f}".format(current_underwritten + additional_capacity)
+                    ]
+                }
+                analysis_df = pd.DataFrame(analysis_data)
+
+                # Display the analysis table
+                st.subheader("Application Processing Analysis")
+                st.markdown(analysis_df.to_html(escape=False, index=False, classes='dataframe'), unsafe_allow_html=True)
 
 def generate_pdf(total_savings, savings_df, savings_per_integration_df, hover_descriptions):
     buffer = BytesIO()
